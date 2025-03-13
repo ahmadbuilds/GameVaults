@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-:root {
+/* :root {
   --background: #ffffff;
   --foreground: #171717;
 }
@@ -17,10 +17,18 @@
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}
+}*/
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+.background {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  font-family: sans-serif;
+  background: linear-gradient(135deg, #0f172a, #000000, #1e293b);
+  color: white;
+  text-align: center;
+  overflow: hidden;
+} 
