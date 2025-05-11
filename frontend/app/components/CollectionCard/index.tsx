@@ -2,6 +2,7 @@
 import { motion } from 'framer-motion';
 import { GameCollection } from '../../mocks/lists';
 import { mockGames } from '../../mocks/games';
+import Link from 'next/link';
 
 interface CollectionCardProps {
   collection: GameCollection;
@@ -14,6 +15,7 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
   );
 
   return (
+      <Link href={`/Dashboard/list/${collection.id}`}> 
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -110,5 +112,7 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
         </div>
       </div>
     </motion.div>
+
+    </Link>
   );
 }
