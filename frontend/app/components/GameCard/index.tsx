@@ -1,4 +1,5 @@
 // components/GameCard/index.tsx
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Game } from '../../mocks/games';
 
@@ -20,6 +21,7 @@ const statusLabels = {
   abandoned: 'Abandoned'
 };
 
+
 export default function GameCard({ game }: GameCardProps) {
   return (
     <motion.div
@@ -29,8 +31,11 @@ export default function GameCard({ game }: GameCardProps) {
       className="bg-[#1E2A45]/80 hover:bg-[#1E2A45] border border-[#3A4B72]/30 rounded-xl p-4 transition-all duration-300 shadow-md hover:shadow-lg overflow-hidden"
     >
       <div className="flex gap-4">
-        {/* Cover Image */}
-        <div className="w-24 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-[#2B3654]">
+        {/* Cover Image - Make clickable */}
+        <Link 
+          href={`/Dashboard/library/${game.id}`}
+          className="w-24 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-[#2B3654]"
+        >
           {game.coverImage ? (
             <img 
               src={game.coverImage} 
@@ -44,12 +49,18 @@ export default function GameCard({ game }: GameCardProps) {
               </svg>
             </div>
           )}
-        </div>
+        </Link>
 
         {/* Game Info */}
         <div className="flex-1 flex flex-col">
+          {/* Make title clickable */}
           <div className="flex justify-between items-start">
-            <h3 className="text-lg font-bold text-white">{game.title}</h3>
+            <Link 
+              href={`/Dashboard/library/${game.id}`}
+              className="text-lg font-bold text-white hover:text-purple-400 transition-colors duration-200"
+            >
+              {game.title}
+            </Link>
             {game.rating && (
               <div className="flex items-center bg-[#2B3654] px-2 py-1 rounded-md">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-yellow-400 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -58,14 +69,6 @@ export default function GameCard({ game }: GameCardProps) {
                 <span className="text-sm font-medium">{game.rating}</span>
               </div>
             )}
-          </div>
-
-          <div className="text-sm text-gray-400 mt-1">{game.platform}</div>
-
-          {/* Status and Progress */}
-          <div className="mt-2 flex items-center gap-3">
-            <div className={`w-3 h-3 rounded-full ${statusColors[game.status]}`} />
-            <span className="text-sm text-gray-300">{statusLabels[game.status]}</span>
           </div>
 
           {/* Progress Bar */}

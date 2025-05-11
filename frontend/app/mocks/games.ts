@@ -9,6 +9,26 @@ export interface Game {
   rating?: number;
   coverImage?: string;
   lastPlayed?: string;
+  description: string;
+  developer: string;
+  publisher: string;
+  releaseDate: string;
+  genres: string[];
+  playMode: string[];
+  personalNotes?: string;
+  media: {
+    type: 'image' | 'video';
+    url: string;
+    caption?: string;
+    uploadedAt: string;
+  }[];
+  achievements?: {
+    name: string;
+    description: string;
+    unlocked: boolean;
+    unlockedAt?: string;
+    icon?: string;
+  }[];
 }
 
 export const mockGames: Game[] = [
@@ -21,59 +41,56 @@ export const mockGames: Game[] = [
     hoursPlayed: 87,
     rating: 5,
     coverImage: '/images/elden-ring.jpg',
-    lastPlayed: '2023-05-15'
+    lastPlayed: '2023-05-15',
+    description: 'A fantasy action-RPG adventure set in a world co-created by Hidetaka Miyazaki and George R.R. Martin.',
+    developer: 'FromSoftware',
+    publisher: 'Bandai Namco',
+    releaseDate: '2022-02-25',
+    genres: ['Action RPG', 'Open World', 'Souls-like'],
+    playMode: ['Single-player', 'Online Co-op'],
+    personalNotes: 'Incredible open world design with rewarding exploration. The combat system is deep and satisfying.',
+    media: [
+      {
+        type: 'image',
+        url: '/media/elden-ring/screenshot1.jpg',
+        caption: 'Exploring Limgrave',
+        uploadedAt: '2023-03-10'
+      },
+      {
+        type: 'video',
+        url: '/media/elden-ring/gameplay1.mp4',
+        caption: 'Boss fight against Margit',
+        uploadedAt: '2023-03-15'
+      },
+      {
+        type: 'image',
+        url: '/media/elden-ring/screenshot2.jpg',
+        caption: 'Raya Lucaria Academy',
+        uploadedAt: '2023-04-02'
+      }
+    ],
+    achievements: [
+      {
+        name: 'Elden Lord',
+        description: 'Achieve the "Elden Lord" ending',
+        unlocked: true,
+        unlockedAt: '2023-05-12',
+        icon: '/achievements/elden-lord.png'
+      },
+      {
+        name: 'Legendary Armaments',
+        description: 'Acquire all legendary armaments',
+        unlocked: true,
+        unlockedAt: '2023-05-10',
+        icon: '/achievements/legendary-armaments.png'
+      },
+      {
+        name: 'Legendary Ashen Remains',
+        description: 'Acquire all legendary ashen remains',
+        unlocked: false,
+        icon: '/achievements/legendary-remains.png'
+      }
+    ]
   },
-  {
-    id: '2',
-    title: 'The Legend of Zelda: Tears of the Kingdom',
-    platform: 'Switch',
-    status: 'playing',
-    progress: 45,
-    hoursPlayed: 32,
-    rating: 4,
-    coverImage: '/images/zelda.jpg',
-    lastPlayed: '2023-06-20'
-  },
-  {
-    id: '3',
-    title: 'Baldur\'s Gate 3',
-    platform: 'PS5',
-    status: 'playing',
-    progress: 28,
-    hoursPlayed: 42,
-    rating: 5,
-    coverImage: '/images/baldurs-gate.jpg',
-    lastPlayed: '2023-08-10'
-  },
-  {
-    id: '4',
-    title: 'Starfield',
-    platform: 'Xbox',
-    status: 'backlog',
-    progress: 0,
-    hoursPlayed: 0,
-    coverImage: '/images/starfield.jpg'
-  },
-  {
-    id: '5',
-    title: 'Cyberpunk 2077',
-    platform: 'PC',
-    status: 'completed',
-    progress: 100,
-    hoursPlayed: 65,
-    rating: 4,
-    coverImage: '/images/cyberpunk.jpg',
-    lastPlayed: '2023-02-28'
-  },
-  {
-    id: '6',
-    title: 'Hogwarts Legacy',
-    platform: 'PS5',
-    status: 'abandoned',
-    progress: 32,
-    hoursPlayed: 18,
-    rating: 3,
-    coverImage: '/images/hogwarts.jpg',
-    lastPlayed: '2023-04-05'
-  }
+  // ... other games with similar detailed data
 ];
