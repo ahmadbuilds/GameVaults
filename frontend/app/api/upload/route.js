@@ -1,7 +1,7 @@
 // app/api/upload/route.js
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import cloudinary from '../../../lib/cloudinary';
+import cloudinary from '../../lib/cloudinary';
 
 export async function POST(request) {
   try {
