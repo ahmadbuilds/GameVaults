@@ -1,14 +1,9 @@
-// app/Dashboard/library/[id]/page.tsx
-import { notFound } from 'next/navigation';
-import { mockGames } from '../../../mocks/games';
-import GameDetail from '../../../../app/components/GameDetails';
+import GameDetail from '../../../components/GameDetails';
 
-export default function GameDetailPage({ params }: { params: { id: string } }) {
-  const game = mockGames.find(game => game.id === params.id);
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
 
-  if (!game) {
-    return notFound();
-  }
-
-  return <GameDetail game={game} />;
+export default function GameDetailPage({ params }: PageProps) {
+  return <GameDetail params={params} />;
 }

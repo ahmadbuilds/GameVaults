@@ -1,51 +1,295 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useUser } from "@clerk/nextjs";
 
-// This would normally come from your API or service
-const platformData = [
-  {
-    id: 1,
-    platform: "Epic Games Launcher",
-    icon: "🎮",
-    unfinished: 9,
-    beaten: 7,
-    completed: 8,
-    endless: 4,
-    total: 29
-  },
-  {
-    id: 2,
-    platform: "Steam",
-    icon: "🎲",
-    unfinished: 5,
-    beaten: 3,
-    completed: 2,
-    endless: 1,
-    total: 11
-  },
-  {
-    id: 3,
-    platform: "PlayStation",
-    icon: "🎯",
-    unfinished: 3,
-    beaten: 2,
-    completed: 4,
-    endless: 0,
-    total: 9
-  }
-];
 
-const PlatformSummary = () => {
-    const [selectedPlatform, setSelectedPlatform] = useState<number | null>(null);
-  
-  const statusConfig = [
-    { name: "Unfinished", color: "bg-red-500", textColor: "text-red-500", icon: "🚫" },
-    { name: "Beaten", color: "bg-green-500", textColor: "text-green-500", icon: "✅" },
-    { name: "Completed", color: "bg-yellow-500", textColor: "text-yellow-500", icon: "🌟" },
-    { name: "Endless", color: "bg-purple-500", textColor: "text-purple-500", icon: "♾️" }
+interface Game {
+  id: string;
+  title: string;
+  platform: string;
+  status: 'backlog' | 'playing' | 'completed' | 'abandoned';
+  genre?: string;
+  releaseDate?: string;
+  rating?: number;
+}
+
+interface UserPlatform {
+  id: string;
+  name: string;
+  icon?: string;
+  gamesCount?: number;
+  userId: string;
+  createdAt?: string;
+}
+
+interface PlatformData {
+  id: number;
+  platform: string;
+  icon: string;
+  backlog: number;
+  playing: number;
+  completed: number;
+  abandoned: number;
+  total: number;
+  gamesCount: number;
+}
+
+interface StatusConfig {
+  name: string;
+  color: string;
+  textColor: string;
+  icon: string;
+}
+
+interface PlatformIcons {
+  [key: string]: string;
+}
+
+const PlatformSummary: React.FC = () => {
+  const { user, isLoaded, isSignedIn } = useUser();
+  const [platformData, setPlatformData] = useState<PlatformData[]>([]);
+  const [userPlatforms, setUserPlatforms] = useState<UserPlatform[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedPlatform, setSelectedPlatform] = useState<number | null>(null);
+
+  const statusConfig: StatusConfig[] = [
+    { name: "Backlog", color: "bg-red-500", textColor: "text-red-500", icon: "📚" },
+    { name: "Playing", color: "bg-blue-500", textColor: "text-blue-500", icon: "🎮" },
+    { name: "Completed", color: "bg-green-500", textColor: "text-green-500", icon: "🌟" },
+    { name: "Abandoned", color: "bg-gray-500", textColor: "text-gray-500", icon: "🚫" }
   ];
+
+  // Platform icons mapping
+  const platformIcons: PlatformIcons = {
+    "Epic Games Launcher": "🎮",
+    "Steam": "🎲",
+    "PlayStation": "🎯",
+    "Xbox": "🎮",
+    "Nintendo Switch": "🕹️",
+    "PC": "💻",
+    "Mobile": "📱",
+    "Default": "🎮"
+  };
+
+  const fetchUserPlatforms = async (userEmail: string): Promise<UserPlatform[]> => {
+    try {
+      const response = await fetch(`http://localhost:4000/platform/email?email=${encodeURIComponent(userEmail)}`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch platforms: ${response.status}`);
+      }
+
+      const platforms: UserPlatform[] = await response.json();
+      
+      
+      if (!Array.isArray(platforms)) {
+        console.warn('Platforms response is not an array:', platforms);
+        return [];
+      }
+      
+      setUserPlatforms(platforms);
+      return platforms;
+    } catch (err) {
+      console.error('Error fetching user platforms:', err);
+      return [];
+    }
+  };
+
+  const fetchUserGames = async (): Promise<void> => {
+    if (!isLoaded || !isSignedIn || !user?.primaryEmailAddress?.emailAddress) {
+      setError("User not authenticated or email not available");
+      setLoading(false);
+      return;
+    }
+
+    const userEmail = user.primaryEmailAddress.emailAddress;
+
+    try {
+      setLoading(true);
+      
+     
+      const [gamesResponse, platforms] = await Promise.all([
+        fetch(`http://localhost:4000/AddGame/UserGames/${encodeURIComponent(userEmail)}`),
+        fetchUserPlatforms(userEmail)
+      ]);
+      
+      if (!gamesResponse.ok) {
+        throw new Error(`Failed to fetch games: ${gamesResponse.status}`);
+      }
+
+      const games: Game[] = await gamesResponse.json();
+      
+     
+      const gamesArray = Array.isArray(games) ? games : [];
+      
+      
+      const platformSummary = processPlatformData(gamesArray, platforms);
+      setPlatformData(platformSummary);
+      setError(null);
+    } catch (err: any) {
+      console.error('Error fetching user games:', err);
+      setError(err?.message || 'An error occurred while fetching games');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const processPlatformData = (games: Game[], platforms: UserPlatform[] = []): PlatformData[] => {
+    const platformMap = new Map<string, PlatformData>();
+
+    
+    const platformsArray = Array.isArray(platforms) ? platforms : [];
+
+    
+    platformsArray.forEach((platform, index) => {
+     
+      if (platform && typeof platform === 'object' && platform.name) {
+        platformMap.set(platform.name, {
+          id: index + 1,
+          platform: platform.name,
+          icon: platform.icon || platformIcons[platform.name] || platformIcons["Default"],
+          backlog: 0,
+          playing: 0,
+          completed: 0,
+          abandoned: 0,
+          total: 0,
+          gamesCount: platform.gamesCount || 0
+        });
+      }
+    });
+
+    
+    const gamesArray = Array.isArray(games) ? games : [];
+
+   
+    gamesArray.forEach(game => {
+     
+      if (!game || typeof game !== 'object') return;
+      
+      const platform = game.platform || 'Unknown';
+      const status = game.status || 'backlog';
+
+      if (!platformMap.has(platform)) {
+        
+        platformMap.set(platform, {
+          id: platformMap.size + 1,
+          platform: platform,
+          icon: platformIcons[platform] || platformIcons["Default"],
+          backlog: 0,
+          playing: 0,
+          completed: 0,
+          abandoned: 0,
+          total: 0,
+          gamesCount: 0
+        });
+      }
+
+      const platformData = platformMap.get(platform);
+      if (!platformData) return; // Type guard
+      
+     
+      switch (status.toLowerCase()) {
+        case 'backlog':
+          platformData.backlog++;
+          break;
+        case 'playing':
+          platformData.playing++;
+          break;
+        case 'completed':
+          platformData.completed++;
+          break;
+        case 'abandoned':
+          platformData.abandoned++;
+          break;
+        default:
+          platformData.backlog++;
+      }
+      
+      platformData.total++;
+    });
+
+    
+    return Array.from(platformMap.values())
+      .filter(platform => platform.total > 0)
+      .sort((a, b) => b.total - a.total);
+  };
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn && user?.primaryEmailAddress?.emailAddress) {
+      fetchUserGames();
+    } else if (isLoaded && !isSignedIn) {
+      setError("Please sign in to view your platform summary");
+      setLoading(false);
+    }
+  }, [isLoaded, isSignedIn, user]);
+
+ 
+  if (!isLoaded) {
+    return (
+      <div className="bg-gradient-to-br from-[#2B3654] to-[#1E2A45] rounded-xl p-6 shadow-lg border border-[#3A4B72]/30">
+        <div className="flex items-center justify-center h-48">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400"></div>
+          <span className="ml-3 text-white">Loading user data...</span>
+        </div>
+      </div>
+    );
+  }
+
+  
+  if (!isSignedIn) {
+    return (
+      <div className="bg-gradient-to-br from-[#2B3654] to-[#1E2A45] rounded-xl p-6 shadow-lg border border-[#3A4B72]/30">
+        <div className="flex items-center justify-center h-48 flex-col">
+          <div className="text-purple-400 text-6xl mb-4">🔐</div>
+          <div className="text-white text-lg mb-2">Authentication Required</div>
+          <div className="text-gray-400 text-center">Please sign in to view your platform summary</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="bg-gradient-to-br from-[#2B3654] to-[#1E2A45] rounded-xl p-6 shadow-lg border border-[#3A4B72]/30">
+        <div className="flex items-center justify-center h-48">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400"></div>
+          <span className="ml-3 text-white">Loading platform data...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-gradient-to-br from-[#2B3654] to-[#1E2A45] rounded-xl p-6 shadow-lg border border-[#3A4B72]/30">
+        <div className="flex items-center justify-center h-48 flex-col">
+          <div className="text-red-400 text-lg mb-2">⚠️ Error</div>
+          <div className="text-white text-center">{error}</div>
+          <button 
+            onClick={fetchUserGames}
+            className="mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (platformData.length === 0 && !loading) {
+    return (
+      <div className="bg-gradient-to-br from-[#2B3654] to-[#1E2A45] rounded-xl p-6 shadow-lg border border-[#3A4B72]/30">
+        <div className="flex items-center justify-center h-48 flex-col">
+          <div className="text-purple-400 text-6xl mb-4">🎮</div>
+          <div className="text-white text-lg mb-2">No Games Found</div>
+          <div className="text-gray-400 text-center">Start adding games to see your platform summary!</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div 
@@ -63,19 +307,6 @@ const PlatformSummary = () => {
           </span>
           Platform Summary
         </h2>
-        <button className="text-gray-300 hover:text-white bg-[#1E2A45] hover:bg-[#2F3B5C] p-2 rounded-lg transition-all duration-300">
-          <svg 
-            className="w-5 h-5" 
-            fill="currentColor" 
-            viewBox="0 0 20 20"
-          >
-            <path 
-              fillRule="evenodd" 
-              d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" 
-              clipRule="evenodd" 
-            />
-          </svg>
-        </button>
       </div>
       
       {/* Platform Legend */}
@@ -102,22 +333,22 @@ const PlatformSummary = () => {
                 <th className="text-left py-3 px-4">Platform</th>
                 <th className="text-center py-3 px-2 w-1/6">
                   <div className="bg-red-500 w-6 h-6 rounded-md mx-auto flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">U</span>
+                    <span className="text-white text-xs font-bold">BL</span>
+                  </div>
+                </th>
+                <th className="text-center py-3 px-2 w-1/6">
+                  <div className="bg-blue-500 w-6 h-6 rounded-md mx-auto flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">P</span>
                   </div>
                 </th>
                 <th className="text-center py-3 px-2 w-1/6">
                   <div className="bg-green-500 w-6 h-6 rounded-md mx-auto flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">B</span>
-                  </div>
-                </th>
-                <th className="text-center py-3 px-2 w-1/6">
-                  <div className="bg-yellow-500 w-6 h-6 rounded-md mx-auto flex items-center justify-center">
                     <span className="text-white text-xs font-bold">C</span>
                   </div>
                 </th>
                 <th className="text-center py-3 px-2 w-1/6">
-                  <div className="bg-purple-500 w-6 h-6 rounded-md mx-auto flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">E</span>
+                  <div className="bg-gray-500 w-6 h-6 rounded-md mx-auto flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">A</span>
                   </div>
                 </th>
                 <th className="text-right py-3 px-4">Total</th>
@@ -142,22 +373,22 @@ const PlatformSummary = () => {
                   </td>
                   <td className="py-4 px-2 text-center">
                     <span className="inline-block px-2 py-1 bg-red-500/10 text-red-400 rounded-md font-medium">
-                      {platform.unfinished}
+                      {platform.backlog}
+                    </span>
+                  </td>
+                  <td className="py-4 px-2 text-center">
+                    <span className="inline-block px-2 py-1 bg-blue-500/10 text-blue-400 rounded-md font-medium">
+                      {platform.playing}
                     </span>
                   </td>
                   <td className="py-4 px-2 text-center">
                     <span className="inline-block px-2 py-1 bg-green-500/10 text-green-400 rounded-md font-medium">
-                      {platform.beaten}
-                    </span>
-                  </td>
-                  <td className="py-4 px-2 text-center">
-                    <span className="inline-block px-2 py-1 bg-yellow-500/10 text-yellow-400 rounded-md font-medium">
                       {platform.completed}
                     </span>
                   </td>
                   <td className="py-4 px-2 text-center">
-                    <span className="inline-block px-2 py-1 bg-purple-500/10 text-purple-400 rounded-md font-medium">
-                      {platform.endless}
+                    <span className="inline-block px-2 py-1 bg-gray-500/10 text-gray-400 rounded-md font-medium">
+                      {platform.abandoned}
                     </span>
                   </td>
                   <td className="py-4 px-4 text-right">
@@ -186,47 +417,47 @@ const PlatformSummary = () => {
                   <span className="font-medium text-white">{platform.platform}</span> breakdown:
                 </div>
                 <div className="h-4 w-full bg-[#121928] rounded-full overflow-hidden flex">
-                  {platform.unfinished > 0 && (
+                  {platform.backlog > 0 && (
                     <motion.div 
                       initial={{ width: 0 }}
-                      animate={{ width: `${(platform.unfinished / platform.total) * 100}%` }}
+                      animate={{ width: `${(platform.backlog / platform.total) * 100}%` }}
                       className="h-full bg-red-500"
                     ></motion.div>
                   )}
-                  {platform.beaten > 0 && (
+                  {platform.playing > 0 && (
                     <motion.div 
                       initial={{ width: 0 }}
-                      animate={{ width: `${(platform.beaten / platform.total) * 100}%` }}
-                      className="h-full bg-green-500"
+                      animate={{ width: `${(platform.playing / platform.total) * 100}%` }}
+                      className="h-full bg-blue-500"
                     ></motion.div>
                   )}
                   {platform.completed > 0 && (
                     <motion.div 
                       initial={{ width: 0 }}
                       animate={{ width: `${(platform.completed / platform.total) * 100}%` }}
-                      className="h-full bg-yellow-500"
+                      className="h-full bg-green-500"
                     ></motion.div>
                   )}
-                  {platform.endless > 0 && (
+                  {platform.abandoned > 0 && (
                     <motion.div 
                       initial={{ width: 0 }}
-                      animate={{ width: `${(platform.endless / platform.total) * 100}%` }}
-                      className="h-full bg-purple-500"
+                      animate={{ width: `${(platform.abandoned / platform.total) * 100}%` }}
+                      className="h-full bg-gray-500"
                     ></motion.div>
                   )}
                 </div>
                 <div className="mt-2 grid grid-cols-4 gap-2 text-xs text-center">
                   <div>
-                    <span className="text-red-400 font-medium">{((platform.unfinished / platform.total) * 100).toFixed(1)}%</span> Unfinished
+                    <span className="text-red-400 font-medium">{((platform.backlog / platform.total) * 100).toFixed(1)}%</span> Backlog
                   </div>
                   <div>
-                    <span className="text-green-400 font-medium">{((platform.beaten / platform.total) * 100).toFixed(1)}%</span> Beaten
+                    <span className="text-blue-400 font-medium">{((platform.playing / platform.total) * 100).toFixed(1)}%</span> Playing
                   </div>
                   <div>
-                    <span className="text-yellow-400 font-medium">{((platform.completed / platform.total) * 100).toFixed(1)}%</span> Completed
+                    <span className="text-green-400 font-medium">{((platform.completed / platform.total) * 100).toFixed(1)}%</span> Completed
                   </div>
                   <div>
-                    <span className="text-purple-400 font-medium">{((platform.endless / platform.total) * 100).toFixed(1)}%</span> Endless
+                    <span className="text-gray-400 font-medium">{((platform.abandoned / platform.total) * 100).toFixed(1)}%</span> Abandoned
                   </div>
                 </div>
               </div>
@@ -255,14 +486,14 @@ const PlatformSummary = () => {
         <div className="bg-[#1E2A45]/60 p-3 rounded-lg border border-[#3A4B72]/20">
           <div className="text-xs text-gray-400">Completion Rate</div>
           <div className="text-xl font-bold text-green-400">
-            {((platformData.reduce((sum, platform) => sum + platform.completed, 0) / 
-               platformData.reduce((sum, platform) => sum + platform.total, 0)) * 100).toFixed(1)}%
+            {platformData.length > 0 ? ((platformData.reduce((sum, platform) => sum + platform.completed, 0) / 
+               platformData.reduce((sum, platform) => sum + platform.total, 0)) * 100).toFixed(1) : 0}%
           </div>
         </div>
         <div className="bg-[#1E2A45]/60 p-3 rounded-lg border border-[#3A4B72]/20">
           <div className="text-xs text-gray-400">Backlog</div>
           <div className="text-xl font-bold text-red-400">
-            {platformData.reduce((sum, platform) => sum + platform.unfinished, 0)}
+            {platformData.reduce((sum, platform) => sum + platform.backlog, 0)}
           </div>
         </div>
       </motion.div>

@@ -7,7 +7,6 @@ const BacklogSearch: React.FC = () => {
   
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real application, you would trigger a search here
     console.log("Searching for:", searchTerm);
   };
   

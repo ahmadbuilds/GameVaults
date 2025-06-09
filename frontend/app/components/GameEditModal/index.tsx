@@ -5,14 +5,19 @@ import { useState } from 'react';
 import { Game } from '../../mocks/games';
 import GameEditForm from '../GameEditForm';
 import { motion } from 'framer-motion';
+import { redirect } from 'next/navigation';
 
 interface GameEditModalProps {
   game: Game;
-  onClose: () => void;
   onSave: (updatedGame: Game) => void;
 }
 
-export default function GameEditModal({ game, onClose, onSave }: GameEditModalProps) {
+export default function GameEditModal({ game, onSave }: GameEditModalProps) {
+
+
+  const onClose=()=>{
+    redirect('/dashboard/library');
+  }
   return (
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
       <motion.div

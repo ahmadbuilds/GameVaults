@@ -2,7 +2,6 @@ import { type Metadata } from 'next'
 import {ClerkProvider} from '@clerk/nextjs'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
-//import { auth } from '@clerk/nextjs/server'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -28,7 +27,7 @@ export default async function RootLayout({
     appearance={{
       variables: {
         colorBackground: '#000000',
-        colorPrimary: '#eee', // Indigo
+        colorPrimary: '#eee', 
         colorText: 'white',
         colorInputBackground: '#1F1F1F',
         colorInputText: '#FFFFFF',

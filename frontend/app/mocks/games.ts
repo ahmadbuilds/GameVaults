@@ -1,4 +1,3 @@
-// mocks/games.ts
 export interface Game {
   id: string;
   title: string;
@@ -92,5 +91,4 @@ export const mockGames: Game[] = [
       }
     ]
   },
-  // ... other games with similar detailed data
 ];

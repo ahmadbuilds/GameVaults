@@ -13,7 +13,7 @@ const SearchBar: React.FC = () => {
   const router = useRouter();
   const [isSearching, setIsSearching] = useState(false);
   
-  // Function to handle search with debouncing
+ 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const term = e.target.value;
     setSearchTerm(term);
@@ -21,7 +21,6 @@ const SearchBar: React.FC = () => {
     if (term.length > 0) {
       setIsSearching(true);
       
-      // Debounce search to avoid too many requests while typing
       const timeoutId = setTimeout(async () => {
         try {
           const results = await searchGames(term);
@@ -41,7 +40,7 @@ const SearchBar: React.FC = () => {
     }
   };
   
-  // Close results when clicking outside
+  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (!(event.target as HTMLElement).closest('.search-container')) {
@@ -89,14 +88,14 @@ const SearchBar: React.FC = () => {
                   key={game.id}
                   className="px-4 py-2 hover:bg-[#303030] cursor-pointer flex items-center gap-3"
                   onClick={() => {
-                    // If it's a library game, go to library details, otherwise to backlog
+                   
                     const path = game.status ? 
-                      `/Dashboard/library/${game.id}` : // Library game with status
-                      `/Dashboard/backlog/${game.id}`;  // Backlog game
+                      `/Dashboard/library/${game.id}` : 
+                      `/Dashboard/backlog/${game.id}`;  
                     
-                    // You can implement navigation here when backend is ready
+                    
                     console.log(`Navigating to: ${path}`);
-                    // router.push(path);
+                    
                     setShowResults(false);
                     setSearchTerm('');
                   }}
@@ -121,7 +120,7 @@ const SearchBar: React.FC = () => {
             </div>
           ) : searchTerm ? (
             <div className="px-4 py-3 text-gray-400">
-              No games found matching "{searchTerm}"
+              No games found matching {searchTerm}
             </div>
           ) : null}
         </div>

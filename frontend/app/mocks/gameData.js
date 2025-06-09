@@ -1,4 +1,3 @@
-// mocks/gameData.js
 export const mockGames = [
     {
       id: 1,

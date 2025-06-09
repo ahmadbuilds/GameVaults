@@ -1,9 +1,8 @@
-// mocks/lists.ts
 export interface GameCollection {
   id: string;
   name: string;
   description?: string;
-  games: string[]; // Array of game IDs
+  games: string[]; 
   tags: string[];
   isPublic: boolean;
   createdAt: string;

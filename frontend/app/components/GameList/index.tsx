@@ -1,20 +1,63 @@
-// components/GameList/index.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Game, mockGames } from '../../mocks/games';
 import GameCard from '../GameCard';
+import { Game } from '../../types/game';
 
 type SortOption = 'title' | 'progress' | 'hours' | 'rating';
 type FilterOption = 'all' | 'completed' | 'playing' | 'backlog' | 'abandoned';
 
-export default function GameList() {
+interface GameListProps {
+  userEmail: string;
+}
+
+export default function GameList({ userEmail }: GameListProps) {
+  const [games, setGames] = useState<Game[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>('title');
   const [filterBy, setFilterBy] = useState<FilterOption>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const sortedAndFilteredGames = mockGames
+  const fetchGames = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`http://localhost:4000/AddGame/GetGamesByEmail?email=${encodeURIComponent(userEmail)}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch games');
+      }
+      
+      const data = await response.json();
+      console.log(data);
+      if (data.success) {
+       
+        const processedGames = data.data.map((game: any) => ({
+          ...game,
+        
+          firstImageUrl: game.mediaUrls?.find((media: any) => media.type === 'image')?.url || null,
+          
+          displayImageUrl: game.mediaUrls?.find((media: any) => media.type === 'image')?.url || game.imageUrl || null
+        }));
+        setGames(processedGames);
+      } else {
+        throw new Error(data.error || 'Unknown error');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (userEmail) {
+      fetchGames();
+    }
+  }, [userEmail]);
+
+  const sortedAndFilteredGames = games
     .filter(game => {
       const matchesFilter = filterBy === 'all' || game.status === filterBy;
       const matchesSearch = game.title.toLowerCase().includes(searchQuery.toLowerCase());
@@ -35,14 +78,36 @@ export default function GameList() {
       }
     });
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-[#1E2A45]/30 border border-[#3A4B72]/20 rounded-xl p-8 text-center">
+        <div className="inline-flex items-center justify-center p-4 bg-rose-500/10 rounded-full mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-rose-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-medium text-white mb-2">Error loading games</h3>
+        <p className="text-gray-400 mb-4">{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
   return (
-
-    
-
     <div className="flex flex-col gap-6">
-
-
-
       {/* Controls */}
       <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
         {/* Search */}
@@ -104,7 +169,7 @@ export default function GameList() {
 
       {/* Game Count */}
       <div className="text-sm text-gray-400">
-        Showing {sortedAndFilteredGames.length} of {mockGames.length} games
+        Showing {sortedAndFilteredGames.length} of {games.length} games
       </div>
 
       {/* Games Grid */}
@@ -124,7 +189,11 @@ export default function GameList() {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         >
           {sortedAndFilteredGames.map((game) => (
-            <GameCard key={game.id} game={game} />
+            <GameCard 
+              key={game._id} 
+              game={game} 
+              onGameUpdated={fetchGames} 
+            />
           ))}
         </motion.div>
       ) : (
@@ -134,9 +203,13 @@ export default function GameList() {
               <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-white mb-2">No games found</h3>
+          <h3 className="text-lg font-medium text-white mb-2">
+            {games.length === 0 ? 'Your library is empty' : 'No games found'}
+          </h3>
           <p className="text-gray-400">
-            Try adjusting your search or filter criteria
+            {games.length === 0 
+              ? 'Add your first game to get started' 
+              : 'Try adjusting your search or filter criteria'}
           </p>
         </div>
       )}
