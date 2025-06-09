@@ -2,7 +2,6 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { searchGames } from '../services/searchService';
 
 const SearchBar: React.FC = () => {
@@ -10,7 +9,7 @@ const SearchBar: React.FC = () => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);
   
-  const router = useRouter();
+  
   const [isSearching, setIsSearching] = useState(false);
   
  

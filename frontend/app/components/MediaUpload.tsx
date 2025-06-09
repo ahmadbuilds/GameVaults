@@ -112,9 +112,9 @@ export default function MediaUpload({
         
         let apiUrl: string;
         if (detectedUploadType === 'collection') {
-          apiUrl = `http://localhost:4000/collections/AddMedia/${targetId}/${encodeURIComponent(user.primaryEmailAddress.emailAddress)}`;
+          apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/collections/AddMedia/${targetId}/${encodeURIComponent(user.primaryEmailAddress.emailAddress)}`;
         } else {
-          apiUrl = `http://localhost:4000/AddGame/AddMedia/${targetId}/${encodeURIComponent(user.primaryEmailAddress.emailAddress)}`;
+          apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/AddGame/AddMedia/${targetId}/${encodeURIComponent(user.primaryEmailAddress.emailAddress)}`;
         }
 
         console.log('Upload type:', detectedUploadType);

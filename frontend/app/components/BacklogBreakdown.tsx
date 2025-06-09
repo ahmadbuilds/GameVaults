@@ -56,7 +56,7 @@
         setError(null);
 
         const userEmail = user.emailAddresses[0].emailAddress;
-        const response = await fetch(`http://localhost:4000/AddGame/UserGames/${encodeURIComponent(userEmail)}`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/AddGame/UserGames/${encodeURIComponent(userEmail)}`);
         
         if (!response.ok) {
           throw new Error(`Failed to fetch games: ${response.statusText}`);

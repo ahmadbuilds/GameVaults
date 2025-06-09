@@ -79,7 +79,7 @@ export default function CollectionDetailPage() {
       setLoading(true);
       setError(null);
 
-      const url = `http://localhost:4000/collections/GetCollection/${collectionId}${userEmail ? `?userEmail=${encodeURIComponent(userEmail)}` : ''}`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/collections/GetCollection/${collectionId}${userEmail ? `?userEmail=${encodeURIComponent(userEmail)}` : ''}`;
       const response = await fetch(url);
       
       if (!response.ok) {
@@ -114,7 +114,7 @@ export default function CollectionDetailPage() {
     try {
       setDeletingGame(gameId);
       
-      const response = await fetch(`http://localhost:4000/collections/RemoveGameFromCollection/${collectionId}/${gameId}/${encodeURIComponent(userEmail)}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/collections/RemoveGameFromCollection/${collectionId}/${gameId}/${encodeURIComponent(userEmail)}`, {
         method: 'DELETE',
       });
 
@@ -138,7 +138,7 @@ export default function CollectionDetailPage() {
     if (!userEmail) return;
 
     try {
-      const response = await fetch(`http://localhost:4000/collections/DeleteCollection/${collectionId}/${encodeURIComponent(userEmail)}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/collections/DeleteCollection/${collectionId}/${encodeURIComponent(userEmail)}`, {
         method: 'DELETE',
       });
 
@@ -165,7 +165,7 @@ const handleDeleteMedia = async (mediaPublicId: string) => {
     const encodedPublicId = encodeURIComponent(mediaPublicId);
     console.log('Encoded publicId:', encodedPublicId);
     
-    const response = await fetch(`http://localhost:4000/collections/RemoveMedia/${collectionId}/${encodeURIComponent(userEmail)}/${encodedPublicId}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/collections/RemoveMedia/${collectionId}/${encodeURIComponent(userEmail)}/${encodedPublicId}`, {
       method: 'DELETE',
     });
 

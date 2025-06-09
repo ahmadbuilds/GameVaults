@@ -43,7 +43,7 @@ export default function AddGamePage() {
 
         try {
           const response = await fetch(
-            `http://localhost:4000/platform/email?email=${encodeURIComponent(userEmail)}`
+            `${process.env.NEXT_PUBLIC_API_URL}/platform/email?email=${encodeURIComponent(userEmail)}`
           );
           if (!response.ok) throw new Error('Failed to fetch platforms');
 
@@ -144,7 +144,7 @@ export default function AddGamePage() {
 
   try {
    
-    const gameResponse = await fetch('http://localhost:4000/AddGame/GameRegister', {
+    const gameResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/AddGame/GameRegister`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -159,7 +159,7 @@ export default function AddGamePage() {
 
     
     const platformResponse = await fetch(
-      `http://localhost:4000/platform/update-count/${encodeURIComponent(formData.platform)}/${encodeURIComponent(formData.userEmail)}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/platform/update-count/${encodeURIComponent(formData.platform)}/${encodeURIComponent(formData.userEmail)}`,
       {
         method: 'PATCH',
         headers: {

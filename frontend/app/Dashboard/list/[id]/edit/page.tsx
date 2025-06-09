@@ -41,7 +41,7 @@ export default function EditCollectionPage() {
       setLoading(true);
       setError(null);
 
-      const url = `http://localhost:4000/collections/GetCollection/${collectionId}${userEmail ? `?userEmail=${encodeURIComponent(userEmail)}` : ''}`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/collections/GetCollection/${collectionId}${userEmail ? `?userEmail=${encodeURIComponent(userEmail)}` : ''}`;
       const response = await fetch(url);
       
       if (!response.ok) {
@@ -80,7 +80,7 @@ export default function EditCollectionPage() {
       setSaving(true);
       setError(null);
 
-      const response = await fetch(`http://localhost:4000/collections/UpdateCollection/${collectionId}/${encodeURIComponent(userEmail)}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/collections/UpdateCollection/${collectionId}/${encodeURIComponent(userEmail)}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

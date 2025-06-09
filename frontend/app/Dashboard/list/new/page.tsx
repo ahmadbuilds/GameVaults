@@ -45,7 +45,7 @@ export default function NewCollectionPage() {
         console.log('Fetching games for user:', userEmail);
         
         
-        const response = await fetch(`http://localhost:4000/AddGame/GetGamesByEmail?email=${encodeURIComponent(userEmail)}`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/AddGame/GetGamesByEmail?email=${encodeURIComponent(userEmail)}`);
         
         console.log('Response status:', response.status);
         
@@ -113,7 +113,7 @@ export default function NewCollectionPage() {
 
       console.log('Creating collection with data:', collectionData);
 
-      const response = await fetch(`http://localhost:4000/collections/CreateCollection/${encodeURIComponent(userEmail)}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/collections/CreateCollection/${encodeURIComponent(userEmail)}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -140,7 +140,7 @@ export default function NewCollectionPage() {
           const gamePromises = selectedGames.map(async (gameId) => {
             try {
               const addGameResponse = await fetch(
-                `http://localhost:4000/collections/AddGameToCollection/${collectionId}/${encodeURIComponent(userEmail)}`,
+                `${process.env.NEXT_PUBLIC_API_URL}/collections/AddGameToCollection/${collectionId}/${encodeURIComponent(userEmail)}`,
                 {
                   method: 'POST',
                   headers: {

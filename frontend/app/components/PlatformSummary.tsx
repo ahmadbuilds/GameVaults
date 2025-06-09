@@ -76,7 +76,7 @@ const PlatformSummary: React.FC = () => {
 
   const fetchUserPlatforms = async (userEmail: string): Promise<UserPlatform[]> => {
     try {
-      const response = await fetch(`http://localhost:4000/platform/email?email=${encodeURIComponent(userEmail)}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/platform/email?email=${encodeURIComponent(userEmail)}`);
       
       if (!response.ok) {
         throw new Error(`Failed to fetch platforms: ${response.status}`);
@@ -112,7 +112,7 @@ const PlatformSummary: React.FC = () => {
       
      
       const [gamesResponse, platforms] = await Promise.all([
-        fetch(`http://localhost:4000/AddGame/UserGames/${encodeURIComponent(userEmail)}`),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/AddGame/UserGames/${encodeURIComponent(userEmail)}`),
         fetchUserPlatforms(userEmail)
       ]);
       

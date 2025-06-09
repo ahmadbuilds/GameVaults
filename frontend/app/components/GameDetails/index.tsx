@@ -48,7 +48,7 @@ export default function GameDetail({ params }: GameDetailProps) {
     
     try {
       setIsLoading(true);
-      const response = await fetch(`http://localhost:4000/AddGame/GetGamesByEmail?email=${encodeURIComponent(user.primaryEmailAddress.emailAddress)}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/AddGame/GetGamesByEmail?email=${encodeURIComponent(user.primaryEmailAddress.emailAddress)}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch games');
@@ -86,7 +86,7 @@ export default function GameDetail({ params }: GameDetailProps) {
 
     try {
       const response = await fetch(
-        `http://localhost:4000/AddGame/RemoveMedia/${game._id}/${encodeURIComponent(user.primaryEmailAddress.emailAddress)}/${mediaPublicId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/AddGame/RemoveMedia/${game._id}/${encodeURIComponent(user.primaryEmailAddress.emailAddress)}/${mediaPublicId}`,
         { method: 'DELETE' }
       );
 
@@ -108,7 +108,7 @@ export default function GameDetail({ params }: GameDetailProps) {
     setIsDeleting(true);
     try {
       const response = await fetch(
-        `http://localhost:4000/AddGame/DeleteGame/${game._id}/${encodeURIComponent(user.primaryEmailAddress.emailAddress)}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/AddGame/DeleteGame/${game._id}/${encodeURIComponent(user.primaryEmailAddress.emailAddress)}`,
         { method: 'DELETE' }
       );
 

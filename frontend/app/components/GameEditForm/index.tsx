@@ -61,7 +61,7 @@ export default function GameEditForm({ game, onSave, onCancel }: GameEditFormPro
         console.log('Fetching platforms for user:', userEmail);
         
         const response = await fetch(
-          `http://localhost:4000/platform/email?email=${encodeURIComponent(userEmail)}`
+          `${process.env.NEXT_PUBLIC_API_URL}/platform/email?email=${encodeURIComponent(userEmail)}`
         );
         
         if (!response.ok) {

@@ -79,7 +79,7 @@ export default function CollectionList() {
         throw new Error('User email not found');
       }
 
-      const response = await fetch(`http://localhost:4000/collections/UserCollections/${encodeURIComponent(userEmail)}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/collections/UserCollections/${encodeURIComponent(userEmail)}`);
       
       if (!response.ok) {
         throw new Error(`Failed to fetch collections: ${response.statusText}`);

@@ -47,7 +47,7 @@ export default function PlatformsList({ searchQuery = '' }: { searchQuery?: stri
     try {
       setLoading(true);
       const response = await fetch(
-        `http://localhost:4000/platform/email?email=${user?.primaryEmailAddress?.emailAddress}`
+        `${process.env.NEXT_PUBLIC_API_URL}/platform/email?email=${user?.primaryEmailAddress?.emailAddress}`
       );
       if (!response.ok) throw new Error('Failed to fetch platforms');
       const { data } = await response.json();
@@ -76,7 +76,7 @@ export default function PlatformsList({ searchQuery = '' }: { searchQuery?: stri
     try {
       setLoading(true);
       const response = await fetch(
-        `http://localhost:4000/platform/search?email=${user.primaryEmailAddress.emailAddress}&name=${query}`
+        `${process.env.NEXT_PUBLIC_API_URL}/platform/search?email=${user.primaryEmailAddress.emailAddress}&name=${query}`
       );
       if (!response.ok) throw new Error('Failed to search platforms');
       const { data } = await response.json();
@@ -109,7 +109,7 @@ export default function PlatformsList({ searchQuery = '' }: { searchQuery?: stri
         return;
       }
 
-      const response = await fetch('http://localhost:4000/platform', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/platform`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
