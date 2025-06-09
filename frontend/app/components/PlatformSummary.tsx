@@ -50,7 +50,7 @@ interface PlatformIcons {
 const PlatformSummary: React.FC = () => {
   const { user, isLoaded, isSignedIn } = useUser();
   const [platformData, setPlatformData] = useState<PlatformData[]>([]);
-  const [userPlatforms, setUserPlatforms] = useState<UserPlatform[]>([]);
+  const [, setUserPlatforms] = useState<UserPlatform[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPlatform, setSelectedPlatform] = useState<number | null>(null);
@@ -129,9 +129,10 @@ const PlatformSummary: React.FC = () => {
       const platformSummary = processPlatformData(gamesArray, platforms);
       setPlatformData(platformSummary);
       setError(null);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error fetching user games:', err);
-      setError(err?.message || 'An error occurred while fetching games');
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred while fetching games';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

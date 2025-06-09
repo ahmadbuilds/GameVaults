@@ -12,7 +12,13 @@ import MediaUpload from '../MediaUpload';
 interface GameDetailProps {
   params: Promise<{ id: string }>;
 }
-
+interface MediaItem {
+  url: string;
+  type: 'image' | 'video';
+  publicId: string;
+  caption?: string;
+  uploadedAt: Date;
+}
 const statusColors = {
   completed: 'bg-emerald-500',
   playing: 'bg-blue-500',
@@ -157,14 +163,14 @@ export default function GameDetail({ params }: GameDetailProps) {
   }
 
   
-  const screenshots = game.mediaUrls?.filter(media => media.type === 'image') || [];
-  const videos = game.mediaUrls?.filter(media => media.type === 'video') || [];
+  const screenshots: MediaItem[] = (game.mediaUrls?.filter(media => media.type === 'image') || []) as MediaItem[];
+  const videos: MediaItem[] = (game.mediaUrls?.filter(media => media.type === 'video') || []) as MediaItem[];
 
   // If no media exists, fallback to single imageUrl
   if (screenshots.length === 0 && game.imageUrl) {
-    screenshots.push({
+      screenshots.push({
       url: game.imageUrl,
-      type: 'image',
+      type: 'image' as const,
       publicId: 'fallback',
       caption: 'Game Cover',
       uploadedAt: new Date()
@@ -180,7 +186,8 @@ export default function GameDetail({ params }: GameDetailProps) {
       >
         {/* Header with Back Button */}
         <div className="flex items-center gap-4 mb-6">
-          <button 
+          <button
+            title='Back' 
             onClick={() => router.push('/Dashboard/library')}
             className="bg-[#1E2A45] hover:bg-[#2F3B5C] p-3 rounded-lg transition-all duration-300 group"
           >

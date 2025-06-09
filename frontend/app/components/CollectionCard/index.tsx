@@ -55,7 +55,6 @@ interface CollectionCardProps {
 
 export default function CollectionCard({ collection }: CollectionCardProps) {
   
-  const previewGames = collection.games.slice(0, 3);
 
   return (
     <Link href={`/Dashboard/list/${collection._id}`}>

@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { useUser } from '@clerk/nextjs';
 
 interface Platform {
-  id: string;
+  _id: string;
   name: string;
   gamesCount: number;
 }
@@ -19,7 +19,7 @@ export default function PlatformsList({ searchQuery = '' }: { searchQuery?: stri
   const [showAddForm, setShowAddForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [prevSearchQuery, setPrevSearchQuery] = useState('');
+  const [, setPrevSearchQuery] = useState('');
 
   useEffect(() => {
     if (user?.primaryEmailAddress?.emailAddress) {
@@ -52,7 +52,7 @@ export default function PlatformsList({ searchQuery = '' }: { searchQuery?: stri
       if (!response.ok) throw new Error('Failed to fetch platforms');
       const { data } = await response.json();
       
-      const formattedPlatforms = data.map((platform: any) => ({
+      const formattedPlatforms = data.map((platform: Platform) => ({
         id: platform._id,
         name: platform.name,
         gamesCount: platform.gamesCount
@@ -81,7 +81,7 @@ export default function PlatformsList({ searchQuery = '' }: { searchQuery?: stri
       if (!response.ok) throw new Error('Failed to search platforms');
       const { data } = await response.json();
       
-      const formattedPlatforms = data.map((platform: any) => ({
+      const formattedPlatforms = data.map((platform: Platform) => ({
         id: platform._id,
         name: platform.name,
         gamesCount: platform.gamesCount
@@ -197,7 +197,7 @@ export default function PlatformsList({ searchQuery = '' }: { searchQuery?: stri
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredPlatforms.length > 0 ? (
             filteredPlatforms.map((platform) => (
-              <Link href={`/Dashboard/backlog`} key={platform.id}>
+              <Link href={`/Dashboard/backlog`} key={platform._id}>
                 <motion.div
                   whileHover={{ y: -5 }}
                   className="bg-[#1E2A45]/80 hover:bg-[#1E2A45] border border-[#3A4B72]/30 rounded-xl p-4 transition-all duration-300 shadow-md hover:shadow-lg"

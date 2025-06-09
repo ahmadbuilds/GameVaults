@@ -4,16 +4,41 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 
+
+interface Platform {
+  _id: string;
+  name: string;
+  gamesCount: number;
+}
+
+interface FormData {
+  title: string;
+  platform: string;
+  status: string;
+  progress: string | number;
+  hoursPlayed: string | number;
+  rating: string | number;
+  description: string;
+  developer: string;
+  publisher: string;
+  releaseDate: string;
+  genres: string[];
+  playMode: string[];
+  personalNotes: string;
+  owned: boolean;
+  userEmail: string;
+}
+
 export default function AddGamePage() {
   const router = useRouter();
   const { user } = useUser();
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+  const [success, setSuccess] = useState<string>('');
   const [platformOptions, setPlatformOptions] = useState<string[]>([]);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     title: '',
     platform: '',
     status: 'backlog',
@@ -48,7 +73,7 @@ export default function AddGamePage() {
           if (!response.ok) throw new Error('Failed to fetch platforms');
 
           const data = await response.json();
-          const names = data.data.map((p: any) => p.name);
+          const names = data.data.map((p: Platform) => p.name);
           setPlatformOptions(names);
 
           if (names.length > 0) {
@@ -79,9 +104,15 @@ export default function AddGamePage() {
         [name]: checked
       }));
     } else {
+      // Handle boolean conversion for owned field
+      let processedValue: string | boolean = value;
+      if (name === 'owned') {
+        processedValue = value === 'true';
+      }
+      
       setFormData(prev => ({
         ...prev,
-        [name]: value === 'true' ? true : value === 'false' ? false : value
+        [name]: processedValue
       }));
     }
   };
@@ -130,60 +161,58 @@ export default function AddGamePage() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsSubmitting(true);
-  setError('');
-  setSuccess('');
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError('');
+    setSuccess('');
 
-  if (!formData.title || !formData.platform || !formData.status || !formData.userEmail) {
-    setError('Title, platform, and status are required');
-    setIsSubmitting(false);
-    return;
-  }
-
-  try {
-   
-    const gameResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/AddGame/GameRegister`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    });
-
-    if (!gameResponse.ok) {
-      const errorData = await gameResponse.json();
-      throw new Error(errorData.error || 'Failed to add game');
+    if (!formData.title || !formData.platform || !formData.status || !formData.userEmail) {
+      setError('Title, platform, and status are required');
+      setIsSubmitting(false);
+      return;
     }
 
-    
-    const platformResponse = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/platform/update-count/${encodeURIComponent(formData.platform)}/${encodeURIComponent(formData.userEmail)}`,
-      {
-        method: 'PATCH',
+    try {
+      const gameResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/AddGame/GameRegister`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify(formData),
+      });
+
+      if (!gameResponse.ok) {
+        const errorData = await gameResponse.json();
+        throw new Error(errorData.error || 'Failed to add game');
       }
-    );
 
-    if (!platformResponse.ok) {
-      const errorData = await platformResponse.json();
-      throw new Error(errorData.error || 'Failed to update platform game count');
+      const platformResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/platform/update-count/${encodeURIComponent(formData.platform)}/${encodeURIComponent(formData.userEmail)}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!platformResponse.ok) {
+        const errorData = await platformResponse.json();
+        throw new Error(errorData.error || 'Failed to update platform game count');
+      }
+
+      setSuccess('Game added successfully!');
+      setTimeout(() => {
+        router.push('/Dashboard/library');
+      }, 1500);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred while adding the game';
+      setError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const data = await gameResponse.json();
-    setSuccess('Game added successfully!');
-    setTimeout(() => {
-      router.push('/Dashboard/library');
-    }, 1500);
-  } catch (err: any) {
-    setError(err.message || 'An error occurred while adding the game');
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -206,6 +235,7 @@ export default function AddGamePage() {
             <div>
                <label className="block text-sm font-medium text-gray-400 mb-1">Title*</label>
                <input
+                title='title'
                 type="text"
                 name="title"
                 value={formData.title}
@@ -218,6 +248,7 @@ export default function AddGamePage() {
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-1">Platform*</label>
               <select
+                title='platform'
                 name="platform"
                 value={formData.platform}
                 onChange={handleChange}
@@ -241,6 +272,7 @@ export default function AddGamePage() {
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-1">Status*</label>
               <select
+                title='status'
                 name="status"
                 value={formData.status}
                 onChange={handleChange}
@@ -257,6 +289,7 @@ export default function AddGamePage() {
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-1">Progress (%)</label>
               <input
+                title='progress'
                 type="number"
                 name="progress"
                 min="0"
@@ -270,6 +303,7 @@ export default function AddGamePage() {
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-1">Hours Played</label>
               <input
+                title='Hours Played'
                 type="number"
                 name="hoursPlayed"
                 min="0"
@@ -283,6 +317,7 @@ export default function AddGamePage() {
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-1">Rating (1-5)</label>
               <input
+                title='rating'
                 type="number"
                 name="rating"
                 min="1"
@@ -296,6 +331,7 @@ export default function AddGamePage() {
             <div>
                <label className="block text-sm font-medium text-gray-400 mb-1">Ownership Status</label>
                <select
+                title='Games Owned'
                 name="owned"
                 value={formData.owned.toString()}
                 onChange={handleChange}
@@ -310,6 +346,7 @@ export default function AddGamePage() {
          <div>
              <label className="block text-sm font-medium text-gray-400 mb-1">Description</label>
              <textarea
+              title='description'
               name="description"
               value={formData.description}
               onChange={handleChange}
@@ -322,6 +359,7 @@ export default function AddGamePage() {
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-1">Developer</label>
               <input
+                title='Developer'
                 type="text"
                 name="developer"
                 value={formData.developer}
@@ -333,6 +371,7 @@ export default function AddGamePage() {
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-1">Publisher</label>
               <input
+                title='Publisher'
                 type="text"
                 name="publisher"
                 value={formData.publisher}
@@ -345,6 +384,7 @@ export default function AddGamePage() {
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-1">Release Date</label>
             <input
+              title='Date'
               type="date"
               name="releaseDate"
               value={formData.releaseDate}
@@ -356,6 +396,7 @@ export default function AddGamePage() {
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-1">Personal Notes</label>
             <textarea
+              title='Personal Notes'
               name="personalNotes"
               value={formData.personalNotes}
               onChange={handleChange}

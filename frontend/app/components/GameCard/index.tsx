@@ -15,7 +15,7 @@ const statusColors = {
   abandoned: 'bg-rose-500'
 };
 
-export default function GameCard({ game, onGameUpdated }: GameCardProps) {
+export default function GameCard({ game }: GameCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}

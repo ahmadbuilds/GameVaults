@@ -11,6 +11,22 @@ interface GameEditFormProps {
   onCancel: () => void;
 }
 
+// Add proper types for platform data
+interface PlatformItem {
+  name?: string;
+  platformName?: string;
+  // Add other potential properties if known
+  [key: string]: unknown;
+}
+
+interface PlatformResponse {
+  data?: PlatformItem[];
+  platforms?: PlatformItem[];
+  // In case the response is directly an array
+  [key: number]: PlatformItem;
+  length?: number;
+}
+
 const statusOptions = [
   { value: 'playing', label: 'Playing' },
   { value: 'completed', label: 'Completed' },
@@ -41,7 +57,20 @@ export default function GameEditForm({ game, onSave, onCancel }: GameEditFormPro
     };
   });
 
- 
+  // Helper function to extract platform names with proper typing
+  const extractPlatformName = (platformItem: unknown): string => {
+    if (typeof platformItem === 'string') {
+      return platformItem;
+    }
+    
+    if (typeof platformItem === 'object' && platformItem !== null) {
+      const platform = platformItem as PlatformItem;
+      return platform.name || platform.platformName || '';
+    }
+    
+    return '';
+  };
+
   useEffect(() => {
     const fetchUserPlatforms = async () => {
       
@@ -49,7 +78,6 @@ export default function GameEditForm({ game, onSave, onCancel }: GameEditFormPro
         return;
       }
 
-    
       const userEmail = user.primaryEmailAddress?.emailAddress || user.emailAddresses?.[0]?.emailAddress;
       
       if (!userEmail) return;
@@ -68,28 +96,27 @@ export default function GameEditForm({ game, onSave, onCancel }: GameEditFormPro
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
+        const data: PlatformResponse = await response.json();
         console.log('Platform response:', data);
 
-        
         let platforms: string[] = [];
         
         if (Array.isArray(data)) {
-          
-          platforms = data.map((p: any) => typeof p === 'string' ? p : p.name || p.platformName || '').filter(Boolean);
+          // Direct array response
+          platforms = data.map(extractPlatformName).filter(Boolean);
         } else if (data.data && Array.isArray(data.data)) {
-          
-          platforms = data.data.map((p: any) => typeof p === 'string' ? p : p.name || p.platformName || '').filter(Boolean);
+          // Nested in data property
+          platforms = data.data.map(extractPlatformName).filter(Boolean);
         } else if (data.platforms && Array.isArray(data.platforms)) {
-          
-          platforms = data.platforms.map((p: any) => typeof p === 'string' ? p : p.name || p.platformName || '').filter(Boolean);
+          // Nested in platforms property
+          platforms = data.platforms.map(extractPlatformName).filter(Boolean);
         }
 
         console.log('Processed platforms:', platforms);
         
         setPlatformOptions(platforms);
 
-       
+        // Ensure current platform is included in options
         if (formData.platform && !platforms.includes(formData.platform)) {
           setPlatformOptions(prev => [...prev, formData.platform]);
         }
@@ -99,7 +126,7 @@ export default function GameEditForm({ game, onSave, onCancel }: GameEditFormPro
         setPlatformError('Failed to load platforms');
         setPlatformOptions([]);
         
-        
+        // Fallback: include current platform if it exists
         if (formData.platform) {
           setPlatformOptions([formData.platform]);
         }
@@ -143,6 +170,7 @@ export default function GameEditForm({ game, onSave, onCancel }: GameEditFormPro
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <button 
+            title='Edit'
             onClick={onCancel}
             className="bg-[#1E2A45] hover:bg-[#2F3B5C] p-3 rounded-lg transition-all duration-300 group"
           >
@@ -197,6 +225,7 @@ export default function GameEditForm({ game, onSave, onCancel }: GameEditFormPro
                     Platform *
                   </label>
                   <select
+                    title='platform'
                     name="platform"
                     value={formData.platform}
                     onChange={handleChange}
@@ -236,6 +265,7 @@ export default function GameEditForm({ game, onSave, onCancel }: GameEditFormPro
                     Status *
                   </label>
                   <select
+                    title='status'
                     name="status"
                     value={formData.status}
                     onChange={handleChange}
@@ -362,6 +392,7 @@ export default function GameEditForm({ game, onSave, onCancel }: GameEditFormPro
                     Release Date
                   </label>
                   <input
+                    title='Release'
                     type="date"
                     name="releaseDate"
                     value={formData.releaseDate || ''}

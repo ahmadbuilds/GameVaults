@@ -234,6 +234,7 @@ export default function CollectionList() {
         <div className="flex gap-3 w-full md:w-auto">
           <div className="relative flex-1 md:flex-none">
             <select
+              title='Sort'
               className="appearance-none bg-[#1E2A45] border border-[#3A4B72]/50 text-gray-300 rounded-lg py-2 px-4 pr-8 outline-none focus:border-purple-400 transition-all duration-300 w-full"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}
@@ -252,6 +253,7 @@ export default function CollectionList() {
 
           <div className="relative flex-1 md:flex-none">
             <select
+              title='filter'
               className="appearance-none bg-[#1E2A45] border border-[#3A4B72]/50 text-gray-300 rounded-lg py-2 px-4 pr-8 outline-none focus:border-purple-400 transition-all duration-300 w-full"
               value={filterBy}
               onChange={(e) => setFilterBy(e.target.value as FilterOption)}

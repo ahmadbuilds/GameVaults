@@ -285,6 +285,7 @@ export default function NewCollectionPage() {
                     >
                       <div className="flex items-center gap-3">
                         <input
+                          title='Add Game'
                           type="checkbox"
                           checked={selectedGames.includes(game._id)}
                           onChange={() => {}} // Handled by parent onClick

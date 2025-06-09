@@ -1,8 +1,6 @@
-// components/GameEditModal/index.tsx
 'use client';
 
-import { useState } from 'react';
-import { Game } from '../../mocks/games';
+import { Game } from '../../types/game'; 
 import GameEditForm from '../GameEditForm';
 import { motion } from 'framer-motion';
 import { redirect } from 'next/navigation';
@@ -14,10 +12,10 @@ interface GameEditModalProps {
 
 export default function GameEditModal({ game, onSave }: GameEditModalProps) {
 
-
-  const onClose=()=>{
+  const onClose = () => {
     redirect('/dashboard/library');
   }
+
   return (
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
       <motion.div

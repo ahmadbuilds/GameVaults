@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 
 interface MediaUploadProps {
@@ -25,7 +24,6 @@ export default function MediaUpload({
   const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
   const [captions, setCaptions] = useState<{ [key: string]: string }>({});
   const { user } = useUser();
-  const router = useRouter();
 
  
   const detectedUploadType = uploadType || (collectionId ? 'collection' : 'game');
@@ -181,6 +179,7 @@ export default function MediaUpload({
             Add Media {detectedUploadType === 'collection' ? 'to Collection' : 'to Game'}
           </h2>
           <button
+            title='Add Media'
             onClick={onClose}
             className="text-gray-400 hover:text-white transition-colors"
           >
@@ -270,6 +269,7 @@ export default function MediaUpload({
                     </div>
                     
                     <button
+                      title='Remove'
                       onClick={() => removeFile(index)}
                       className="text-red-400 hover:text-red-300 transition-colors"
                       disabled={uploading}

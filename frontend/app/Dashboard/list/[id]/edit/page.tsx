@@ -291,6 +291,7 @@ export default function EditCollectionPage() {
                     >
                       {tag}
                       <button
+                        title='Remove Tag'
                         type="button"
                         onClick={() => removeTag(tag)}
                         className="text-gray-400 hover:text-red-400 transition-colors"

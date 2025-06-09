@@ -11,7 +11,21 @@ type FilterOption = 'all' | 'completed' | 'playing' | 'backlog' | 'abandoned';
 interface GameListProps {
   userEmail: string;
 }
+interface MediaUrl {
+  type: string;
+  url: string;
+}
 
+interface RawGameData {
+  _id: string;
+  title: string;
+  status: string;
+  progress: number;
+  hoursPlayed: number;
+  rating?: number;
+  imageUrl?: string;
+  mediaUrls?: MediaUrl[];
+}
 export default function GameList({ userEmail }: GameListProps) {
   const [games, setGames] = useState<Game[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,13 +47,11 @@ export default function GameList({ userEmail }: GameListProps) {
       console.log(data);
       if (data.success) {
        
-        const processedGames = data.data.map((game: any) => ({
-          ...game,
-        
-          firstImageUrl: game.mediaUrls?.find((media: any) => media.type === 'image')?.url || null,
-          
-          displayImageUrl: game.mediaUrls?.find((media: any) => media.type === 'image')?.url || game.imageUrl || null
-        }));
+        const processedGames = data.data.map((game: RawGameData) => ({
+        ...game,
+        firstImageUrl: game.mediaUrls?.find((media: MediaUrl) => media.type === 'image')?.url || null,
+        displayImageUrl: game.mediaUrls?.find((media: MediaUrl) => media.type === 'image')?.url || game.imageUrl || null
+      }));
         setGames(processedGames);
       } else {
         throw new Error(data.error || 'Unknown error');
@@ -130,6 +142,7 @@ export default function GameList({ userEmail }: GameListProps) {
         <div className="flex gap-3 w-full md:w-auto">
           <div className="relative flex-1 md:flex-none">
             <select
+              title='sort'
               className="appearance-none bg-[#1E2A45] border border-[#3A4B72]/50 text-gray-300 rounded-lg py-2 px-4 pr-8 outline-none focus:border-purple-400 transition-all duration-300 w-full"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}
@@ -148,6 +161,7 @@ export default function GameList({ userEmail }: GameListProps) {
 
           <div className="relative flex-1 md:flex-none">
             <select
+              title='filter'
               className="appearance-none bg-[#1E2A45] border border-[#3A4B72]/50 text-gray-300 rounded-lg py-2 px-4 pr-8 outline-none focus:border-purple-400 transition-all duration-300 w-full"
               value={filterBy}
               onChange={(e) => setFilterBy(e.target.value as FilterOption)}

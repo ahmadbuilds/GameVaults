@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState,FormEvent,ChangeEvent } from "react";
 import { motion } from "framer-motion";
 import BacklogBreakdown from "../../../app/components/BacklogBreakdown";
 import PlatformSummary from "../../../app/components/PlatformSummary";
@@ -39,11 +39,11 @@ export default function BacklogPage() {
     show: { opacity: 1, y: 0 }
   };
 
-  const handleSearchChange = (e) => {
+  const handleSearchChange = (e:ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  const handleSearchSubmit = (e) => {
+  const handleSearchSubmit = (e:FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   };
 
